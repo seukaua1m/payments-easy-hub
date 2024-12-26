@@ -1,4 +1,5 @@
 import { ArrowUpDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const clients = [
   {
@@ -22,6 +23,8 @@ const clients = [
 ];
 
 export const ClientsTable = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <table className="w-full">
@@ -49,7 +52,11 @@ export const ClientsTable = () => {
         </thead>
         <tbody>
           {clients.map((client) => (
-            <tr key={client.id} className="border-b border-gray-200 hover:bg-gray-50">
+            <tr
+              key={client.id}
+              className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+              onClick={() => navigate(`/clients/${client.id}`)}
+            >
               <td className="p-4">{client.name}</td>
               <td className="p-4">R$ {client.total.toFixed(2)}</td>
               <td className="p-4">

@@ -19,16 +19,18 @@ const fetchBills = async () => {
 
 const Bills = () => {
   const { toast } = useToast();
-  const { data: bills, isLoading, error } = useQuery({
+  const { data: bills, isLoading } = useQuery({
     queryKey: ['bills'],
     queryFn: fetchBills,
-    onError: (error) => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as contas. Tente novamente.",
-        variant: "destructive",
-      });
-      console.error('Erro ao carregar contas:', error);
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar as contas. Tente novamente.",
+          variant: "destructive",
+        });
+        console.error('Erro ao carregar contas:', error);
+      },
     },
   });
 
