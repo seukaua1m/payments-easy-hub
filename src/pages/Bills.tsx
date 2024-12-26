@@ -2,41 +2,55 @@ import { Layout } from "@/components/layout/Layout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { PlusCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
-const bills = [
-  {
-    id: 1,
-    description: "Fornecedor A",
-    dueDate: "2024-03-01",
-    value: 1500.0,
-    status: "pending",
-  },
-  {
-    id: 2,
-    description: "Aluguel",
-    dueDate: "2024-02-28",
-    value: 2000.0,
-    status: "overdue",
-  },
-  {
-    id: 3,
-    description: "Energia",
-    dueDate: "2024-03-10",
-    value: 450.0,
-    status: "paid",
-  },
-];
+// Substitua pela URL do seu backend
+const API_URL = 'http://localhost:3000/api';
+
+const fetchBills = async () => {
+  const response = await fetch(`${API_URL}/bills`);
+  if (!response.ok) {
+    throw new Error('Erro ao carregar contas');
+  }
+  return response.json();
+};
 
 const Bills = () => {
+  const { toast } = useToast();
+  const { data: bills, isLoading, error } = useQuery({
+    queryKey: ['bills'],
+    queryFn: fetchBills,
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as contas. Tente novamente.",
+        variant: "destructive",
+      });
+      console.error('Erro ao carregar contas:', error);
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+          <div className="text-gray-500">Carregando...</div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900">Contas a Pagar</h1>
-          <button className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center justify-center gap-2 transition-colors">
+          <Button className="flex items-center gap-2">
             <PlusCircle className="w-5 h-5" />
             Nova Conta
-          </button>
+          </Button>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm">
@@ -50,8 +64,8 @@ const Bills = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bills.map((bill) => (
-                <TableRow key={bill.id}>
+              {bills?.map((bill) => (
+                <TableRow key={bill._id}>
                   <TableCell>{bill.description}</TableCell>
                   <TableCell>
                     {new Date(bill.dueDate).toLocaleDateString("pt-BR")}
