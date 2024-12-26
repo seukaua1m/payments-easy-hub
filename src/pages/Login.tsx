@@ -11,35 +11,18 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      // Substitua pela chamada real à sua API
-      const response = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Armazene o token no localStorage
-        localStorage.setItem("token", data.token);
-        navigate("/");
-      } else {
-        toast({
-          title: "Erro",
-          description: "Email ou senha inválidos",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+    // Mock de autenticação - aceita qualquer email/senha
+    if (email && password) {
+      // Simula armazenamento de token
+      localStorage.setItem("token", "mock-token");
+      navigate("/");
+    } else {
       toast({
         title: "Erro",
-        description: "Erro ao fazer login. Tente novamente.",
+        description: "Por favor, preencha todos os campos",
         variant: "destructive",
       });
     }

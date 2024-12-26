@@ -2,48 +2,34 @@ import { Layout } from "@/components/layout/Layout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { PlusCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 
-// Substitua pela URL do seu backend
-const API_URL = 'http://localhost:3000/api';
-
-const fetchBills = async () => {
-  const response = await fetch(`${API_URL}/bills`);
-  if (!response.ok) {
-    throw new Error('Erro ao carregar contas');
+// Dados mockados para exemplo
+const mockBills = [
+  {
+    _id: '1',
+    description: 'Conta de Luz',
+    dueDate: '2024-03-20',
+    value: 150.00,
+    status: 'pending'
+  },
+  {
+    _id: '2',
+    description: 'Aluguel',
+    dueDate: '2024-03-15',
+    value: 1200.00,
+    status: 'paid'
+  },
+  {
+    _id: '3',
+    description: 'Internet',
+    dueDate: '2024-02-28',
+    value: 99.90,
+    status: 'overdue'
   }
-  return response.json();
-};
+];
 
 const Bills = () => {
-  const { toast } = useToast();
-  const { data: bills, isLoading } = useQuery({
-    queryKey: ['bills'],
-    queryFn: fetchBills,
-    meta: {
-      onError: (error: Error) => {
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar as contas. Tente novamente.",
-          variant: "destructive",
-        });
-        console.error('Erro ao carregar contas:', error);
-      },
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
-          <div className="text-gray-500">Carregando...</div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <div className="space-y-6">
@@ -66,7 +52,7 @@ const Bills = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bills?.map((bill) => (
+              {mockBills.map((bill) => (
                 <TableRow key={bill._id}>
                   <TableCell>{bill.description}</TableCell>
                   <TableCell>
