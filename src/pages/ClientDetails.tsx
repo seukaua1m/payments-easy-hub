@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { useToast } from "@/components/ui/use-toast";
@@ -6,41 +6,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientInfo } from "@/components/client-details/ClientInfo";
 import { ActionButtons } from "@/components/client-details/ActionButtons";
 import { TransactionsTable } from "@/components/client-details/TransactionsTable";
-
-// Dados mockados
-const mockClient = {
-  name: "Maria Silva",
-  address: "Rua das Flores, 123",
-  phone: "(11) 98765-4321",
-  totalPurchases: 1500.00,
-  currentDebt: 350.00,
-};
-
-const mockTransactions = [
-  {
-    _id: "1",
-    date: "2024-03-01",
-    type: "purchase" as const,
-    amount: 150.00,
-  },
-  {
-    _id: "2",
-    date: "2024-02-28",
-    type: "payment" as const,
-    amount: 100.00,
-  },
-  {
-    _id: "3",
-    date: "2024-02-25",
-    type: "purchase" as const,
-    amount: 200.00,
-  },
-];
+import api from '@/lib/api';
 
 const ClientDetails = () => {
   const { id } = useParams();
   const { toast } = useToast();
-  const [transactions] = useState(mockTransactions);
+  const [client, setClient] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    const fetchClientDetails = async () => {
+      try {
+        const response = await api.get(`/client/${id}`);
+        setClient(response.data.client);
+        setTransactions(response.data.transactions || []);
+      } catch (error) {
+        toast({
+          title: "Erro ao carregar detalhes do cliente",
+          description: "Não foi possível carregar os detalhes do cliente",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchClientDetails();
+  }, [id, toast]);
 
   const handleDelete = (transactionId: string) => {
     toast({
@@ -49,10 +39,14 @@ const ClientDetails = () => {
     });
   };
 
+  if (!client) {
+    return <div>Carregando...</div>;
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
-        <ClientInfo client={mockClient} />
+        <ClientInfo client={client} />
         <ActionButtons />
 
         <Tabs defaultValue="all" className="w-full">

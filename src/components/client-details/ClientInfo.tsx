@@ -30,7 +30,7 @@ export const ClientInfo = ({ client }: ClientInfoProps) => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              R$ {client.totalPurchases.toFixed(2)}
+              R$ {client.totalPurchases ? client.totalPurchases.toFixed(2) : '0.00'}
             </p>
           </CardContent>
         </Card>
@@ -41,7 +41,7 @@ export const ClientInfo = ({ client }: ClientInfoProps) => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              R$ {client.currentDebt.toFixed(2)}
+              R$ {client.currentDebt ? client.currentDebt.toFixed(2) : '0.00'}
             </p>
           </CardContent>
         </Card>

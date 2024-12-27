@@ -1,41 +1,57 @@
 import { Layout } from "@/components/layout/Layout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { PlusCircle, AlertCircle } from "lucide-react";
+import { PlusCircle, AlertCircle, Edit, CheckCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-// Dados mockados para exemplo
-const mockBills = [
-  {
-    _id: '1',
-    description: 'Conta de Luz',
-    dueDate: '2024-03-20',
-    value: 150.00,
-    status: 'pending'
-  },
-  {
-    _id: '2',
-    description: 'Aluguel',
-    dueDate: '2024-03-15',
-    value: 1200.00,
-    status: 'paid'
-  },
-  {
-    _id: '3',
-    description: 'Internet',
-    dueDate: '2024-02-28',
-    value: 99.90,
-    status: 'overdue'
-  }
-];
+import { useState } from 'react';
+import { NewBillModal } from '@/components/bills/NewBillModal';
+import { EditBillModal } from '@/components/bills/EditBillModal';
+import { useBills } from '@/hooks/useBills';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 
 const Bills = () => {
+  const [isNewBillModalOpen, setIsNewBillModalOpen] = useState(false);
+  const [isEditBillModalOpen, setIsEditBillModalOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isDeleteConfirmDialogOpen, setIsDeleteConfirmDialogOpen] = useState(false);
+  const [selectedBill, setSelectedBill] = useState(null);
+  const { bills, isLoading, markAsPaid, deleteBill } = useBills();
+
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+
+  const handleEdit = (bill) => {
+    setSelectedBill(bill);
+    setIsEditBillModalOpen(true);
+  };
+
+  const handleMarkAsPaid = (bill) => {
+    setSelectedBill(bill);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const handleConfirmMarkAsPaid = () => {
+    markAsPaid.mutate(selectedBill._id);
+    setIsConfirmDialogOpen(false);
+  };
+
+  const handleDelete = (bill) => {
+    setSelectedBill(bill);
+    setIsDeleteConfirmDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteBill.mutate(selectedBill._id);
+    setIsDeleteConfirmDialogOpen(false);
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900">Contas a Pagar</h1>
-          <Button className="flex items-center gap-2">
+          <Button onClick={() => setIsNewBillModalOpen(true)} className="flex items-center gap-2">
             <PlusCircle className="w-5 h-5" />
             Nova Conta
           </Button>
@@ -49,12 +65,13 @@ const Bills = () => {
                 <TableHead>Vencimento</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockBills.map((bill) => (
+              {bills.map((bill) => (
                 <TableRow key={bill._id}>
-                  <TableCell>{bill.description}</TableCell>
+                  <TableCell>{bill.name}</TableCell>
                   <TableCell>
                     {new Date(bill.dueDate).toLocaleDateString("pt-BR")}
                   </TableCell>
@@ -64,17 +81,30 @@ const Bills = () => {
                       className={cn(
                         "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium",
                         {
-                          "bg-yellow-100 text-yellow-800": bill.status === "pending",
-                          "bg-red-100 text-red-800": bill.status === "overdue",
-                          "bg-green-100 text-green-800": bill.status === "paid",
+                          "bg-yellow-100 text-yellow-800": bill.status === "Pendente",
+                          "bg-red-100 text-red-800": bill.status === "Vencido",
+                          "bg-green-100 text-green-800": bill.status === "Pago",
                         }
                       )}
                     >
-                      {bill.status === "overdue" && <AlertCircle className="w-4 h-4" />}
-                      {bill.status === "pending" && "Pendente"}
-                      {bill.status === "overdue" && "Atrasado"}
-                      {bill.status === "paid" && "Pago"}
+                      {bill.status === "Vencido" && <AlertCircle className="w-4 h-4" />}
+                      {bill.status === "Pendente" && "Pendente"}
+                      {bill.status === "Vencido" && "Vencido"}
+                      {bill.status === "Pago" && "Pago"}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(bill)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleMarkAsPaid(bill)}>
+                        <CheckCircle className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(bill)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -82,6 +112,43 @@ const Bills = () => {
           </Table>
         </div>
       </div>
+      <NewBillModal 
+        isOpen={isNewBillModalOpen}
+        onClose={() => setIsNewBillModalOpen(false)}
+      />
+      <EditBillModal 
+        isOpen={isEditBillModalOpen}
+        onClose={() => setIsEditBillModalOpen(false)}
+        bill={selectedBill}
+      />
+      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Pagamento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja marcar esta conta como paga?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmMarkAsPaid}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={isDeleteConfirmDialogOpen} onOpenChange={setIsDeleteConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja excluir esta conta?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

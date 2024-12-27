@@ -1,5 +1,6 @@
 import { ArrowUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useClients } from '@/hooks/useClients';
 
 const clients = [
   {
@@ -23,7 +24,12 @@ const clients = [
 ];
 
 export const ClientsTable = () => {
+  const { clients, isLoading } = useClients();
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -51,16 +57,18 @@ export const ClientsTable = () => {
           </tr>
         </thead>
         <tbody>
-          {clients.map((client) => (
+        {clients?.map((client) => (
             <tr
-              key={client.id}
+              key={client._id}
               className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-              onClick={() => navigate(`/clients/${client.id}`)}
+              onClick={() => navigate(`/clients/${client._id}`)}
             >
               <td className="p-4">{client.name}</td>
-              <td className="p-4">R$ {client.total.toFixed(2)}</td>
+              <td className="p-4">R$ {client.totalDebt.toFixed(2)}</td>
               <td className="p-4">
-                {new Date(client.lastPayment).toLocaleDateString("pt-BR")}
+                {client.lastPaymentDate 
+                  ? new Date(client.lastPaymentDate).toLocaleDateString("pt-BR")
+                  : "Sem pagamentos"}
               </td>
             </tr>
           ))}

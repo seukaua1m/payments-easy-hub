@@ -3,8 +3,18 @@ import { SearchBar } from "@/components/dashboard/SearchBar";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ClientsTable } from "@/components/dashboard/ClientsTable";
 import { Users, AlertCircle, DollarSign, UserPlus } from "lucide-react";
+import { NewClientModal } from '@/components/clients/NewClientModal';
+import { useState } from 'react';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 const Index = () => {
+  const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
+  const { data, isLoading } = useDashboardData();
+
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+  
   return (
     <Layout>
       <div className="space-y-6">
@@ -21,18 +31,18 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatsCard
             title="Total de Clientes"
-            value="48"
+            value={data.clientsCount.toString()}
             icon={Users}
           />
           <StatsCard
             title="Clientes Atrasados"
-            value="12"
+            value={data.latePaymentsCount.toString()}
             icon={AlertCircle}
             variant="danger"
           />
           <StatsCard
             title="Total em Dívidas"
-            value="R$ 4.250,00"
+            value={`R$ ${data.totalDebt.toFixed(2)}`}
             icon={DollarSign}
             variant="warning"
           />

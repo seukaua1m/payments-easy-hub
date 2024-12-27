@@ -4,25 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const { login } = useAuth();
   const [password, setPassword] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock de autenticação - aceita qualquer email/senha
-    if (email && password) {
-      // Simula armazenamento de token
-      localStorage.setItem("token", "mock-token");
-      navigate("/");
-    } else {
+    try {
+      await login(email, password);
+      navigate('/');
+    } catch (error) {
       toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos",
+        title: "Erro ao fazer login",
+        description: "Verifique suas credenciais",
         variant: "destructive",
       });
     }
