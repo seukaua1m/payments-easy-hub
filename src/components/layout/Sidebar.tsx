@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -20,6 +20,7 @@ const menuItems = [
 
 export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
 
   return (
     <aside
@@ -33,7 +34,11 @@ export const Sidebar = () => {
             <Link
               key={item.label}
               to={item.path}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
+              className={`flex items-center gap-2 px-4 py-2 text-gray-600 transition-colors ${
+                location.pathname === item.path
+                  ? "bg-gray-50 text-primary"
+                  : "hover:bg-gray-50 hover:text-primary"
+              }`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
               {!collapsed && <span>{item.label}</span>}

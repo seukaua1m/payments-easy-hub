@@ -57,98 +57,108 @@ const Bills = () => {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bills.map((bill) => (
-                <TableRow key={bill._id}>
-                  <TableCell>{bill.name}</TableCell>
-                  <TableCell>
-                    {new Date(bill.dueDate).toLocaleDateString("pt-BR")}
-                  </TableCell>
-                  <TableCell>R$ {bill.value.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium",
-                        {
-                          "bg-yellow-100 text-yellow-800": bill.status === "Pendente",
-                          "bg-red-100 text-red-800": bill.status === "Vencido",
-                          "bg-green-100 text-green-800": bill.status === "Pago",
-                        }
-                      )}
-                    >
-                      {bill.status === "Vencido" && <AlertCircle className="w-4 h-4" />}
-                      {bill.status === "Pendente" && "Pendente"}
-                      {bill.status === "Vencido" && "Vencido"}
-                      {bill.status === "Pago" && "Pago"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(bill)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleMarkAsPaid(bill)}>
-                        <CheckCircle className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(bill)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        {bills.length === 0 ? (
+          <div className="flex flex-col items-center justify-center mt-8">
+            <img src="/no-bills.svg" alt="No bills" className="w-64 h-64 mb-4" />
+            <p className="text-gray-500">Você ainda não registrou nenhuma conta</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Vencimento</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {bills.map((bill) => (
+                  <TableRow key={bill._id}>
+                    <TableCell>{bill.name}</TableCell>
+                    <TableCell>
+                      {new Date(bill.dueDate).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                    <TableCell>R$ {bill.value.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium",
+                          {
+                            "bg-yellow-100 text-yellow-800": bill.status === "Pendente",
+                            "bg-red-100 text-red-800": bill.status === "Vencido",
+                            "bg-green-100 text-green-800": bill.status === "Pago",
+                          }
+                        )}
+                      >
+                        {bill.status === "Vencido" && <AlertCircle className="w-4 h-4" />}
+                        {bill.status === "Pendente" && "Pendente"}
+                        {bill.status === "Vencido" && "Vencido"}
+                        {bill.status === "Pago" && "Pago"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(bill)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleMarkAsPaid(bill)}>
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(bill)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        <NewBillModal 
+          isOpen={isNewBillModalOpen}
+          onClose={() => setIsNewBillModalOpen(false)}
+        />
+        <EditBillModal 
+          isOpen={isEditBillModalOpen}
+          onClose={() => setIsEditBillModalOpen(false)}
+          bill={selectedBill}
+        />
+
+        <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Pagamento</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja marcar esta conta como paga?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmMarkAsPaid}>Confirmar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={isDeleteConfirmDialogOpen} onOpenChange={setIsDeleteConfirmDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir esta conta?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete}>Confirmar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-      <NewBillModal 
-        isOpen={isNewBillModalOpen}
-        onClose={() => setIsNewBillModalOpen(false)}
-      />
-      <EditBillModal 
-        isOpen={isEditBillModalOpen}
-        onClose={() => setIsEditBillModalOpen(false)}
-        bill={selectedBill}
-      />
-      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Pagamento</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza de que deseja marcar esta conta como paga?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmMarkAsPaid}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <AlertDialog open={isDeleteConfirmDialogOpen} onOpenChange={setIsDeleteConfirmDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza de que deseja excluir esta conta?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Layout>
   );
 };

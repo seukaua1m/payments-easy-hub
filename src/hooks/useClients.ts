@@ -33,9 +33,31 @@ export function useClients() {
     },
   });
 
+  const addPurchase = useMutation({
+    mutationFn: async (newPurchase) => {
+      const response = await api.post(`/client/${newPurchase.clientId}/purchase`, newPurchase);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['clients']);
+    },
+  });
+
+  const addPayment = useMutation({
+    mutationFn: async (newPayment) => {
+      const response = await api.post(`/client/${newPayment.clientId}/payment`, newPayment);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['clients']);
+    },
+  });
+
   return {
     clients,
     isLoading,
     addClient,
+    addPurchase,
+    addPayment,
   };
 }

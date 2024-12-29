@@ -6,10 +6,12 @@ import { Users, AlertCircle, DollarSign, UserPlus } from "lucide-react";
 import { NewClientModal } from '@/components/clients/NewClientModal';
 import { useState } from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Index = () => {
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const { data, isLoading } = useDashboardData();
+  const { storeName } = useStoreSettings();
 
   if (isLoading) {
     return <div>Carregando...</div>;
@@ -18,11 +20,18 @@ const Index = () => {
   return (
     <Layout>
       <div className="space-y-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">{storeName || 'Minha Loja'}</h1>
+        </div>
+        
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="w-full sm:w-96">
             <SearchBar />
           </div>
-          <button className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center justify-center gap-2 transition-colors">
+          <button 
+            onClick={() => setIsNewClientModalOpen(true)}
+            className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
+          >
             <UserPlus className="w-5 h-5" />
             Novo Cliente
           </button>
@@ -54,6 +63,11 @@ const Index = () => {
           </h2>
           <ClientsTable />
         </div>
+
+        <NewClientModal
+        isOpen={isNewClientModalOpen}
+          onClose={() => setIsNewClientModalOpen(false)}
+        />
       </div>
     </Layout>
   );
